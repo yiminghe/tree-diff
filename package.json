@@ -1,0 +1,49 @@
+{
+  "name": "tree-diff",
+  "version": "0.1.0",
+  "description": "diff tree node like React",
+  "keywords": [
+    "tree diff",
+    "algorithm"
+  ],
+  "engines": {
+    "node": ">=4.0.0"
+  },
+  "homepage": "https://github.com/yiminghe/tree-diff",
+  "author": "yiminghe@gmail.com",
+  "repository": "yiminghe/tree-diff",
+  "bugs": "https://github.com/yiminghe/tree-diff/issues",
+  "files": [
+    "lib"
+  ],
+  "license": "MIT",
+  "main": "./lib/index",
+  "config": {
+    "port": 8000
+  },
+  "scripts": {
+    "watch-tsc": "rc-tools run watch-tsc",
+    "build": "rc-tools run build",
+    "gh-pages": "rc-tools run gh-pages",
+    "start": "rc-tools run server",
+    "pub": "rc-tools run pub",
+    "lint": "rc-tools run lint",
+    "karma": "rc-tools run karma",
+    "saucelabs": "rc-tools run saucelabs",
+    "test": "rc-tools run test",
+    "chrome-test": "rc-tools run chrome-test",
+    "coverage": "rc-tools run coverage"
+  },
+  "dependencies": {
+  },
+  "devDependencies": {
+    "expect.js": "0.3.x",
+    "react": "15.x",
+    "react-dom": "15.x",
+    "pre-commit": "1.x",
+    "rc-tools": "5.x"
+  },
+  "pre-commit": [
+    "lint"
+  ]
+}
