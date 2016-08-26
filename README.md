@@ -27,7 +27,7 @@ http://yiminghe.github.io/tree-diff
 
 ## Api
 
-### diff(currentNodes: any[], nextNodes : any[], options = {}): Patch
+### diff(fromNodes: any[], afterNodes : any[], options = {}): Patch
 
 #### options.shouldUpdate(node1, node2, node1Index, node2Index)
 

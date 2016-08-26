@@ -32,18 +32,18 @@ function getArray(q, ensure = true) {
 
 patch(operations, {
   processNew(q) {
-    getArray(q).splice(q.toPath[q.toPath.length - 1], 0, q.nextNode);
+    getArray(q).splice(q.toIndex, 0, q.afterNode);
   },
   processRemove(q) {
     const arr = getArray(q);
-    const r = arr[q.path[q.path.length - 1]];
-    arr.splice(q.path[q.path.length - 1], 1);
+    const r = arr[q.fromIndex];
+    arr.splice(q.fromIndex, 1);
     return r;
   },
   processUpdate() {
   },
   processMove(q, r) {
-    getArray(q).splice(q.toPath[q.toPath.length - 1], 0, r);
+    getArray(q).splice(q.toIndex, 0, r);
   },
 });
 

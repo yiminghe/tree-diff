@@ -1,3 +1,5 @@
+import { UPDATE, MOVE, REMOVE, NEW } from './ChildOperationTypes';
+
 function indexOf(nodes, node, isSame, nodeIndex) {
   const len = nodes.length;
   for (let i = 0; i < len; i++) {
@@ -13,65 +15,68 @@ function nativeShould(a, b) {
 }
 
 function sortByIndex(a, b) {
-  if (a.currentIndex === b.currentIndex) {
+  if (a.fromIndex === b.fromIndex) {
     return 0;
   }
-  return a.currentIndex > b.currentIndex ? -1 : 1;
+  return a.fromIndex > b.fromIndex ? -1 : 1;
 }
 
 // diff by level
-function diff(currentNodes, nextNodes, options = {}, internal = {}) {
+function diff(fromNodes, afterNodes, options = {}, internal = {}) {
   const { shouldUpdate = nativeShould, childrenKey = 'children' } = options;
-  const { path = [], parentNode } = internal;
+  const { fromPath = [], parentNode } = internal;
   let insertQueue = [];
   let updateQueue = [];
   let removeQueue = [];
   let lastIndex = 0;
   let tmp;
-  nextNodes.forEach((nextNode, nextIndex) => {
-    const currentIndex = indexOf(currentNodes, nextNode, shouldUpdate, nextIndex);
-    if (currentIndex !== -1) {
-      const currentNode = currentNodes[currentIndex];
+  afterNodes.forEach((afterNode, toIndex) => {
+    const fromIndex = indexOf(fromNodes, afterNode, shouldUpdate, toIndex);
+    if (fromIndex !== -1) {
+      const fromNode = fromNodes[fromIndex];
       updateQueue.push({
-        type: 'update',
-        currentNode,
-        nextNode,
+        type: UPDATE,
+        fromNode,
+        afterNode,
         parentNode,
-        path: path.concat(currentIndex),
+        fromIndex,
+        fromPath: fromPath.concat(fromIndex),
       });
-      if (currentIndex < lastIndex) {
+      if (fromIndex < lastIndex) {
         tmp = {
-          type: 'move',
-          currentNode,
-          nextNode,
+          type: MOVE,
+          fromNode,
+          afterNode,
           parentNode,
-          currentIndex,
-          path: path.concat(currentIndex),
-          toPath: path.concat(nextIndex),
+          fromIndex,
+          toIndex,
+          fromPath: fromPath.concat(fromIndex),
+          toPath: fromPath.concat(toIndex),
         };
         insertQueue.push(tmp);
         removeQueue.push(tmp);
       }
-      lastIndex = Math.max(currentIndex, lastIndex);
+      lastIndex = Math.max(fromIndex, lastIndex);
     } else {
       insertQueue.push({
-        type: 'new',
-        nextNode,
+        type: NEW,
+        afterNode,
         parentNode,
-        toPath: path.concat(nextIndex),
+        toIndex,
+        toPath: fromPath.concat(toIndex),
       });
     }
   });
 
-  currentNodes.forEach((currentNode, currentIndex) => {
-    const nextIndex = indexOf(nextNodes, currentNode, shouldUpdate, currentIndex);
-    if (nextIndex === -1) {
+  fromNodes.forEach((fromNode, fromIndex) => {
+    const toIndex = indexOf(afterNodes, fromNode, shouldUpdate, fromIndex);
+    if (toIndex === -1) {
       removeQueue.push({
-        type: 'remove',
-        currentNode,
+        type: REMOVE,
+        fromNode,
         parentNode,
-        currentIndex,
-        path: path.concat(currentIndex),
+        fromIndex,
+        fromPath: fromPath.concat(fromIndex),
       });
     }
   });
@@ -80,12 +85,12 @@ function diff(currentNodes, nextNodes, options = {}, internal = {}) {
 
   if (childrenKey) {
     updateQueue.concat().forEach((o) => {
-      const currentChildren = o.currentNode[childrenKey] || [];
-      const nextChildren = o.nextNode[childrenKey] || [];
+      const currentChildren = o.fromNode[childrenKey] || [];
+      const nextChildren = o.afterNode[childrenKey] || [];
       // bottom up
       const ret = diff(currentChildren, nextChildren, options, {
-        path: o.path,
-        parentNode: o.currentNode,
+        fromPath: o.fromPath,
+        parentNode: o.fromNode,
       });
       insertQueue = ret.insertQueue.concat(insertQueue);
       updateQueue = ret.updateQueue.concat(updateQueue);
@@ -100,6 +105,6 @@ function diff(currentNodes, nextNodes, options = {}, internal = {}) {
   };
 }
 
-export default function diffTree(currentNodes, nextNodes, options) {
-  return diff(currentNodes, nextNodes, options);
+export default function diffTree(fromNodes, afterNodes, options) {
+  return diff(fromNodes, afterNodes, options);
 }

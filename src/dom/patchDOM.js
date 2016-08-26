@@ -1,9 +1,9 @@
 import patch from '../patch';
 import createDOMNode from './createDOMNode';
 
-function findNodeByPath(root, path) {
+function findNodeByPath(root, fromPath) {
   let parent = root;
-  const node = path.reduce(
+  const node = fromPath.reduce(
       (n, p) => {
         parent = n;
         return n.childNodes[p];
@@ -16,8 +16,8 @@ function findNodeByPath(root, path) {
 }
 
 function processNew(root, q) {
-  const { nextNode, toPath } = q;
-  const newNode = createDOMNode(nextNode);
+  const { afterNode, toPath } = q;
+  const newNode = createDOMNode(afterNode);
   const { parent, node } = findNodeByPath(root, toPath);
   parent.insertBefore(newNode, node);
 }
@@ -28,23 +28,23 @@ function processMove(_, q, { parent, node }) {
 }
 
 function processRemove(root, q) {
-  const { path } = q;
-  const { parent, node } = findNodeByPath(root, path);
+  const { fromPath } = q;
+  const { parent, node } = findNodeByPath(root, fromPath);
   parent.removeChild(node);
   return { parent, node };
 }
 
 function processUpdate(root, q) {
-  const { path, currentNode, nextNode } = q;
-  const { node } = findNodeByPath(root, path);
-  if (typeof nextNode === 'string') {
-    if (nextNode !== currentNode) {
-      node.nodeValue = nextNode;
+  const { fromPath, fromNode, afterNode } = q;
+  const { node } = findNodeByPath(root, fromPath);
+  if (typeof afterNode === 'string') {
+    if (afterNode !== fromNode) {
+      node.nodeValue = afterNode;
     }
     return;
   }
-  const currentProps = currentNode.props;
-  const nextProps = nextNode.props;
+  const currentProps = fromNode.props;
+  const nextProps = afterNode.props;
   for (const nextName in nextProps) {
     if (nextProps.hasOwnProperty(nextName)) {
       const nextValue = nextProps[nextName];

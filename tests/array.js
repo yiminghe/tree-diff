@@ -4,68 +4,72 @@ import expect from 'expect.js';
 import { diff, patch } from 'tree-diff';
 
 describe('array-diff', () => {
+  function simplifyOperations(operations) {
+    return JSON.parse(JSON.stringify(operations, (k, v) => {
+      return k === 'children' || k === 'props' ||
+      k === 'fromIndex' || k === 'toIndex' ? undefined : v;
+    }));
+  }
+
+
   it('works for array', () => {
     const a = ['1', '2', '3'];
     const b = ['4', '3', '1', '2'];
 
-    const operations = diff(a, b, { childrenKey: '' });
+    const operations = diff(a, b);
 
-    expect(JSON.parse(JSON.stringify(operations))).to.eql(
+    expect(simplifyOperations(operations)).to.eql(
       {
         'insertQueue': [
-          { 'type': 'new', 'nextNode': '4', 'toPath': [0] },
+          { 'type': 'new', 'afterNode': '4', 'toPath': [0] },
           {
             'type': 'move',
-            'currentNode': '1',
-            'nextNode': '1',
-            'currentIndex': 0,
-            'path': [0],
+            'fromNode': '1',
+            'afterNode': '1',
+            'fromPath': [0],
             'toPath': [2]
           },
           {
             'type': 'move',
-            'currentNode': '2',
-            'nextNode': '2',
-            'currentIndex': 1,
-            'path': [1],
+            'fromNode': '2',
+            'afterNode': '2',
+            'fromPath': [1],
             'toPath': [3]
           }
         ],
         'updateQueue': [
           {
             'type': 'update',
-            'currentNode': '3',
-            'nextNode': '3',
-            'path': [2]
+            'fromNode': '3',
+            'afterNode': '3',
+            'fromPath': [2]
           },
           {
             'type': 'update',
-            'currentNode': '1',
-            'nextNode': '1',
-            'path': [0]
+            'fromNode': '1',
+            'afterNode': '1',
+            'fromPath': [0]
           },
           {
             'type': 'update',
-            'currentNode': '2',
-            'nextNode': '2',
-            'path': [1]
+            'fromNode': '2',
+            'afterNode': '2',
+            'fromPath': [1]
           }
         ],
         'removeQueue': [
           {
             'type': 'move',
-            'currentNode': '2',
-            'nextNode': '2',
-            'currentIndex': 1,
-            'path': [1],
+            'fromNode': '2',
+            'afterNode': '2',
+            'fromPath': [1],
             'toPath': [3]
           },
           {
             'type': 'move',
-            'currentNode': '1',
-            'nextNode': '1',
-            'currentIndex': 0,
-            'path': [0],
+            'fromNode': '1',
+            'afterNode': '1',
+            'fromPath': [0],
             'toPath': [2]
           }
         ]
@@ -74,11 +78,11 @@ describe('array-diff', () => {
 
     patch(operations, {
       processNew(q) {
-        a.splice(q.toPath[0], 0, q.nextNode);
+        a.splice(q.toPath[0], 0, q.afterNode);
       },
       processRemove(q) {
-        const r = a[q.path[0]];
-        a.splice(q.path[0], 1);
+        const r = a[q.fromPath[0]];
+        a.splice(q.fromPath[0], 1);
         return r;
       },
       processUpdate() {

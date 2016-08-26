@@ -3,24 +3,12 @@
 /* eslint quotes:0, quote-props:0, comma-dangle:0 */
 
 import expect from 'expect.js';
-import renderDOM from '../src/dom/renderDOM';
-
-function dom(type, props, ...children) {
-  const ret = {
-    type,
-    props,
-    children,
-  };
-  if (props && props.key) {
-    ret.key = props.key;
-    delete props.key;
-  }
-  return ret;
-}
+import { dom, renderDOM } from '../src/dom/';
 
 function simplifyOperations(operations) {
   return JSON.parse(JSON.stringify(operations, (k, v) => {
-    return k === 'children' || k === 'props' ? undefined : v;
+    return k === 'children' || k === 'props' ||
+    k === 'fromIndex' || k === 'toIndex' ? undefined : v;
   }));
 }
 
@@ -52,13 +40,13 @@ describe('tree-diff', () => {
       'insertQueue': [
         {
           'type': 'new',
-          'nextNode': { 'type': 'p' },
+          'afterNode': { 'type': 'p' },
           'parentNode': { 'type': 'div' },
           'toPath': [0, 3]
         },
         {
           'type': 'new',
-          'nextNode': { 'type': 'button' },
+          'afterNode': { 'type': 'button' },
           'parentNode': { 'type': 'div' },
           'toPath': [0, 4]
         }
@@ -66,60 +54,59 @@ describe('tree-diff', () => {
       'updateQueue': [
         {
           'type': 'update',
-          'currentNode': '2',
-          'nextNode': '1',
+          'fromNode': '2',
+          'afterNode': '1',
           'parentNode': { 'type': 'p' },
-          'path': [0, 2, 0]
+          'fromPath': [0, 2, 0]
         },
         {
           'type': 'update',
-          'currentNode': '1',
-          'nextNode': '2',
+          'fromNode': '1',
+          'afterNode': '2',
           'parentNode': { 'type': 'p' },
-          'path': [0, 1, 0]
+          'fromPath': [0, 1, 0]
         },
         {
           'type': 'update',
-          'currentNode': 'no key',
-          'nextNode': 'no key',
+          'fromNode': 'no key',
+          'afterNode': 'no key',
           'parentNode': { 'type': 'h2' },
-          'path': [0, 0, 0]
+          'fromPath': [0, 0, 0]
         },
         {
           'type': 'update',
-          'currentNode': { 'type': 'h2' },
-          'nextNode': { 'type': 'h2' },
+          'fromNode': { 'type': 'h2' },
+          'afterNode': { 'type': 'h2' },
           'parentNode': { 'type': 'div' },
-          'path': [0, 0]
+          'fromPath': [0, 0]
         },
         {
           'type': 'update',
-          'currentNode': { 'type': 'p' },
-          'nextNode': { 'type': 'p' },
+          'fromNode': { 'type': 'p' },
+          'afterNode': { 'type': 'p' },
           'parentNode': { 'type': 'div' },
-          'path': [0, 1]
+          'fromPath': [0, 1]
         },
         {
           'type': 'update',
-          'currentNode': { 'type': 'p' },
-          'nextNode': { 'type': 'p' },
+          'fromNode': { 'type': 'p' },
+          'afterNode': { 'type': 'p' },
           'parentNode': { 'type': 'div' },
-          'path': [0, 2]
+          'fromPath': [0, 2]
         },
         {
           'type': 'update',
-          'currentNode': { 'type': 'div' },
-          'nextNode': { 'type': 'div' },
-          'path': [0]
+          'fromNode': { 'type': 'div' },
+          'afterNode': { 'type': 'div' },
+          'fromPath': [0]
         }
       ],
       'removeQueue': [
         {
           'type': 'remove',
-          'currentNode': { 'type': 'button' },
+          'fromNode': { 'type': 'button' },
           'parentNode': { 'type': 'div' },
-          'currentIndex': 3,
-          'path': [0, 3]
+          'fromPath': [0, 3]
         }
       ]
     });
@@ -153,16 +140,15 @@ describe('tree-diff', () => {
         'insertQueue': [
           {
             'type': 'move',
-            'currentNode': { 'type': 'p', 'key': '1' },
-            'nextNode': { 'type': 'p', 'key': '1' },
+            'fromNode': { 'type': 'p', 'key': '1' },
+            'afterNode': { 'type': 'p', 'key': '1' },
             'parentNode': { 'type': 'div' },
-            'currentIndex': 1,
-            'path': [0, 1],
+            'fromPath': [0, 1],
             'toPath': [0, 2]
           },
           {
             'type': 'new',
-            'nextNode': { 'type': 'p', 'key': '3' },
+            'afterNode': { 'type': 'p', 'key': '3' },
             'parentNode': { 'type': 'div' },
             'toPath': [0, 3]
           }
@@ -170,75 +156,74 @@ describe('tree-diff', () => {
         'updateQueue': [
           {
             'type': 'update',
-            'currentNode': 'change',
-            'nextNode': 'change',
+            'fromNode': 'change',
+            'afterNode': 'change',
             'parentNode': { 'type': 'button', 'key': 't' },
-            'path': [0, 3, 0]
+            'fromPath': [0, 3, 0]
           },
           {
             'type': 'update',
-            'currentNode': '1',
-            'nextNode': '1',
+            'fromNode': '1',
+            'afterNode': '1',
             'parentNode': { 'type': 'p', 'key': '1' },
-            'path': [0, 1, 0]
+            'fromPath': [0, 1, 0]
           },
           {
             'type': 'update',
-            'currentNode': '2',
-            'nextNode': '2',
+            'fromNode': '2',
+            'afterNode': '2',
             'parentNode': { 'type': 'p', 'key': '2' },
-            'path': [0, 2, 0]
+            'fromPath': [0, 2, 0]
           },
           {
             'type': 'update',
-            'currentNode': 'with key',
-            'nextNode': 'with key',
+            'fromNode': 'with key',
+            'afterNode': 'with key',
             'parentNode': { 'type': 'h2' },
-            'path': [0, 0, 0]
+            'fromPath': [0, 0, 0]
           },
           {
             'type': 'update',
-            'currentNode': { 'type': 'h2' },
-            'nextNode': { 'type': 'h2' },
+            'fromNode': { 'type': 'h2' },
+            'afterNode': { 'type': 'h2' },
             'parentNode': { 'type': 'div' },
-            'path': [0, 0]
+            'fromPath': [0, 0]
           },
           {
             'type': 'update',
-            'currentNode': { 'type': 'p', 'key': '2' },
-            'nextNode': { 'type': 'p', 'key': '2' },
+            'fromNode': { 'type': 'p', 'key': '2' },
+            'afterNode': { 'type': 'p', 'key': '2' },
             'parentNode': { 'type': 'div' },
-            'path': [0, 2]
+            'fromPath': [0, 2]
           },
           {
             'type': 'update',
-            'currentNode': { 'type': 'p', 'key': '1' },
-            'nextNode': { 'type': 'p', 'key': '1' },
+            'fromNode': { 'type': 'p', 'key': '1' },
+            'afterNode': { 'type': 'p', 'key': '1' },
             'parentNode': { 'type': 'div' },
-            'path': [0, 1]
+            'fromPath': [0, 1]
           },
           {
             'type': 'update',
-            'currentNode': { 'type': 'button', 'key': 't' },
-            'nextNode': { 'type': 'button', 'key': 't' },
+            'fromNode': { 'type': 'button', 'key': 't' },
+            'afterNode': { 'type': 'button', 'key': 't' },
             'parentNode': { 'type': 'div' },
-            'path': [0, 3]
+            'fromPath': [0, 3]
           },
           {
             'type': 'update',
-            'currentNode': { 'type': 'div' },
-            'nextNode': { 'type': 'div' },
-            'path': [0]
+            'fromNode': { 'type': 'div' },
+            'afterNode': { 'type': 'div' },
+            'fromPath': [0]
           }
         ],
         'removeQueue': [
           {
             'type': 'move',
-            'currentNode': { 'type': 'p', 'key': '1' },
-            'nextNode': { 'type': 'p', 'key': '1' },
+            'fromNode': { 'type': 'p', 'key': '1' },
+            'afterNode': { 'type': 'p', 'key': '1' },
             'parentNode': { 'type': 'div' },
-            'currentIndex': 1,
-            'path': [0, 1],
+            'fromPath': [0, 1],
             'toPath': [0, 2]
           }
         ]

@@ -2,25 +2,12 @@
 
 /* eslint no-console:0 */
 
-import renderDOM from 'tree-diff/src/dom/renderDOM';
+import { dom, renderDOM } from 'tree-diff/src/dom/';
 
 function simplifyOperations(operations) {
   return JSON.parse(JSON.stringify(operations, (k, v) => {
     return k === 'children' || k === 'props' ? undefined : v;
   }));
-}
-
-function dom(type, props, ...children) {
-  const ret = {
-    type,
-    props,
-    children,
-  };
-  if (props && props.key) {
-    ret.key = props.key;
-    delete props.key;
-  }
-  return ret;
 }
 
 (() => {
