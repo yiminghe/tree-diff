@@ -1,44 +1,10 @@
-webpackJsonp([1,4],{
+webpackJsonp([3,4],{
 
 /***/ 0:
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = __webpack_require__(173);
+	module.exports = __webpack_require__(182);
 
-
-/***/ },
-
-/***/ 173:
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	var _treeDiff = __webpack_require__(174);
-	
-	var a = ['1', '2', '3']; /* eslint no-console:0 */
-	
-	var b = ['4', '3', '1', '2'];
-	
-	var operations = (0, _treeDiff.diff)(a, b, { childrenKey: '' });
-	
-	console.log('operations', operations);
-	
-	(0, _treeDiff.patch)(operations, {
-	  processNew: function processNew(q) {
-	    a.splice(q.toPath[0], 0, q.nextNode);
-	  },
-	  processRemove: function processRemove(q) {
-	    var r = a[q.path[0]];
-	    a.splice(q.path[0], 1);
-	    return r;
-	  },
-	  processUpdate: function processUpdate() {},
-	  processMove: function processMove(q, r) {
-	    a.splice(q.toPath[0], 0, r);
-	  }
-	});
-	
-	console.log(a, b);
 
 /***/ },
 
@@ -250,7 +216,64 @@ webpackJsonp([1,4],{
 	exports.default = patch;
 	module.exports = exports['default'];
 
+/***/ },
+
+/***/ 182:
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var _treeDiff = __webpack_require__(174);
+	
+	var a = [{ value: '1' }, { value: '2', children: ['1', '2', '3'] }, { value: '3' }]; /* eslint no-console:0 */
+	
+	var b = [{ value: '4' }, { value: '3' }, { value: '1' }, { value: '2', children: ['4', '3', '1', '2'] }];
+	
+	var operations = (0, _treeDiff.diff)(a, b, {
+	  shouldUpdate: function shouldUpdate(v1, v2) {
+	    if (v1.value && v2.value) {
+	      return v1.value === v2.value;
+	    }
+	    return v1 === v2;
+	  }
+	});
+	
+	console.log('operations', operations);
+	
+	function getArray(q) {
+	  var ensure = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
+	
+	  var array = void 0;
+	  if (q.parentNode) {
+	    array = q.parentNode.children;
+	    if (ensure) {
+	      array = q.parentNode.children = q.parentNode.children || [];
+	    }
+	  } else {
+	    array = a;
+	  }
+	  return array;
+	}
+	
+	(0, _treeDiff.patch)(operations, {
+	  processNew: function processNew(q) {
+	    getArray(q).splice(q.toPath[q.toPath.length - 1], 0, q.nextNode);
+	  },
+	  processRemove: function processRemove(q) {
+	    var arr = getArray(q);
+	    var r = arr[q.path[q.path.length - 1]];
+	    arr.splice(q.path[q.path.length - 1], 1);
+	    return r;
+	  },
+	  processUpdate: function processUpdate() {},
+	  processMove: function processMove(q, r) {
+	    getArray(q).splice(q.toPath[q.toPath.length - 1], 0, r);
+	  }
+	});
+	
+	console.log(a, b);
+
 /***/ }
 
 });
-//# sourceMappingURL=arrayString.js.map
+//# sourceMappingURL=treeString.js.map
