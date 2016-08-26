@@ -3,13 +3,13 @@ webpackJsonp([2,4],{
 /***/ 0:
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = __webpack_require__(178);
+	module.exports = __webpack_require__(179);
 
 
 /***/ },
 
 /***/ 176:
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
@@ -17,6 +17,9 @@ webpackJsonp([2,4],{
 	  value: true
 	});
 	exports.default = diffTree;
+	
+	var _ChildOperationTypes = __webpack_require__(177);
+	
 	function indexOf(nodes, node, isSame, nodeIndex) {
 	  var len = nodes.length;
 	  for (var i = 0; i < len; i++) {
@@ -32,22 +35,22 @@ webpackJsonp([2,4],{
 	}
 	
 	function sortByIndex(a, b) {
-	  if (a.currentIndex === b.currentIndex) {
+	  if (a.fromIndex === b.fromIndex) {
 	    return 0;
 	  }
-	  return a.currentIndex > b.currentIndex ? -1 : 1;
+	  return a.fromIndex > b.fromIndex ? -1 : 1;
 	}
 	
 	// diff by level
-	function diff(currentNodes, nextNodes) {
+	function diff(fromNodes, afterNodes) {
 	  var options = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
 	  var internal = arguments.length <= 3 || arguments[3] === undefined ? {} : arguments[3];
 	  var _options$shouldUpdate = options.shouldUpdate;
 	  var shouldUpdate = _options$shouldUpdate === undefined ? nativeShould : _options$shouldUpdate;
 	  var _options$childrenKey = options.childrenKey;
 	  var childrenKey = _options$childrenKey === undefined ? 'children' : _options$childrenKey;
-	  var _internal$path = internal.path;
-	  var path = _internal$path === undefined ? [] : _internal$path;
+	  var _internal$fromPath = internal.fromPath;
+	  var fromPath = _internal$fromPath === undefined ? [] : _internal$fromPath;
 	  var parentNode = internal.parentNode;
 	
 	  var insertQueue = [];
@@ -55,50 +58,53 @@ webpackJsonp([2,4],{
 	  var removeQueue = [];
 	  var lastIndex = 0;
 	  var tmp = void 0;
-	  nextNodes.forEach(function (nextNode, nextIndex) {
-	    var currentIndex = indexOf(currentNodes, nextNode, shouldUpdate, nextIndex);
-	    if (currentIndex !== -1) {
-	      var currentNode = currentNodes[currentIndex];
+	  afterNodes.forEach(function (afterNode, toIndex) {
+	    var fromIndex = indexOf(fromNodes, afterNode, shouldUpdate, toIndex);
+	    if (fromIndex !== -1) {
+	      var fromNode = fromNodes[fromIndex];
 	      updateQueue.push({
-	        type: 'update',
-	        currentNode: currentNode,
-	        nextNode: nextNode,
+	        type: _ChildOperationTypes.UPDATE,
+	        fromNode: fromNode,
+	        afterNode: afterNode,
 	        parentNode: parentNode,
-	        path: path.concat(currentIndex)
+	        fromIndex: fromIndex,
+	        fromPath: fromPath.concat(fromIndex)
 	      });
-	      if (currentIndex < lastIndex) {
+	      if (fromIndex < lastIndex) {
 	        tmp = {
-	          type: 'move',
-	          currentNode: currentNode,
-	          nextNode: nextNode,
+	          type: _ChildOperationTypes.MOVE,
+	          fromNode: fromNode,
+	          afterNode: afterNode,
 	          parentNode: parentNode,
-	          currentIndex: currentIndex,
-	          path: path.concat(currentIndex),
-	          toPath: path.concat(nextIndex)
+	          fromIndex: fromIndex,
+	          toIndex: toIndex,
+	          fromPath: fromPath.concat(fromIndex),
+	          toPath: fromPath.concat(toIndex)
 	        };
 	        insertQueue.push(tmp);
 	        removeQueue.push(tmp);
 	      }
-	      lastIndex = Math.max(currentIndex, lastIndex);
+	      lastIndex = Math.max(fromIndex, lastIndex);
 	    } else {
 	      insertQueue.push({
-	        type: 'new',
-	        nextNode: nextNode,
+	        type: _ChildOperationTypes.NEW,
+	        afterNode: afterNode,
 	        parentNode: parentNode,
-	        toPath: path.concat(nextIndex)
+	        toIndex: toIndex,
+	        toPath: fromPath.concat(toIndex)
 	      });
 	    }
 	  });
 	
-	  currentNodes.forEach(function (currentNode, currentIndex) {
-	    var nextIndex = indexOf(nextNodes, currentNode, shouldUpdate, currentIndex);
-	    if (nextIndex === -1) {
+	  fromNodes.forEach(function (fromNode, fromIndex) {
+	    var toIndex = indexOf(afterNodes, fromNode, shouldUpdate, fromIndex);
+	    if (toIndex === -1) {
 	      removeQueue.push({
-	        type: 'remove',
-	        currentNode: currentNode,
+	        type: _ChildOperationTypes.REMOVE,
+	        fromNode: fromNode,
 	        parentNode: parentNode,
-	        currentIndex: currentIndex,
-	        path: path.concat(currentIndex)
+	        fromIndex: fromIndex,
+	        fromPath: fromPath.concat(fromIndex)
 	      });
 	    }
 	  });
@@ -107,12 +113,12 @@ webpackJsonp([2,4],{
 	
 	  if (childrenKey) {
 	    updateQueue.concat().forEach(function (o) {
-	      var currentChildren = o.currentNode[childrenKey] || [];
-	      var nextChildren = o.nextNode[childrenKey] || [];
+	      var currentChildren = o.fromNode[childrenKey] || [];
+	      var nextChildren = o.afterNode[childrenKey] || [];
 	      // bottom up
 	      var ret = diff(currentChildren, nextChildren, options, {
-	        path: o.path,
-	        parentNode: o.currentNode
+	        fromPath: o.fromPath,
+	        parentNode: o.fromNode
 	      });
 	      insertQueue = ret.insertQueue.concat(insertQueue);
 	      updateQueue = ret.updateQueue.concat(updateQueue);
@@ -127,8 +133,8 @@ webpackJsonp([2,4],{
 	  };
 	}
 	
-	function diffTree(currentNodes, nextNodes, options) {
-	  return diff(currentNodes, nextNodes, options);
+	function diffTree(fromNodes, afterNodes, options) {
+	  return diff(fromNodes, afterNodes, options);
 	}
 	module.exports = exports['default'];
 
@@ -142,6 +148,24 @@ webpackJsonp([2,4],{
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
+	var MOVE = exports.MOVE = 'move';
+	var UPDATE = exports.UPDATE = 'update';
+	var REMOVE = exports.REMOVE = 'remove';
+	var NEW = exports.NEW = 'new';
+
+/***/ },
+
+/***/ 178:
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _ChildOperationTypes = __webpack_require__(177);
+	
 	function patch(_ref, _ref2) {
 	  var removeQueue = _ref.removeQueue;
 	  var insertQueue = _ref.insertQueue;
@@ -159,15 +183,15 @@ webpackJsonp([2,4],{
 	
 	  removeQueue.forEach(function (q) {
 	    var ret = processRemove(q);
-	    if (q.type === 'move') {
+	    if (q.type === _ChildOperationTypes.MOVE) {
 	      moves[q.toPath.join(',')] = ret;
 	    }
 	  });
 	
 	  insertQueue.forEach(function (q) {
-	    if (q.type === 'new') {
+	    if (q.type === _ChildOperationTypes.NEW) {
 	      processNew(q);
-	    } else if (q.type === 'move') {
+	    } else if (q.type === _ChildOperationTypes.MOVE) {
 	      processMove(q, moves[q.toPath.join(',')]);
 	    }
 	  });
@@ -178,16 +202,12 @@ webpackJsonp([2,4],{
 
 /***/ },
 
-/***/ 178:
+/***/ 179:
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
-	var _renderDOM3 = __webpack_require__(179);
-	
-	var _renderDOM4 = _interopRequireDefault(_renderDOM3);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	var _dom = __webpack_require__(180);
 	
 	function simplifyOperations(operations) {
 	  return JSON.parse(JSON.stringify(operations, function (k, v) {
@@ -197,6 +217,183 @@ webpackJsonp([2,4],{
 	
 	/* eslint no-console:0 */
 	
+	(function () {
+	  var vdom1 = (0, _dom.dom)(
+	    'div',
+	    null,
+	    (0, _dom.dom)(
+	      'h2',
+	      null,
+	      'no key'
+	    ),
+	    (0, _dom.dom)(
+	      'p',
+	      { id: '1' },
+	      '1'
+	    ),
+	    (0, _dom.dom)(
+	      'p',
+	      { id: '2' },
+	      '2'
+	    ),
+	    (0, _dom.dom)(
+	      'button',
+	      { id: 't' },
+	      'change'
+	    )
+	  );
+	  var container = document.createElement('div');
+	  document.getElementById('__react-content').appendChild(container);
+	
+	  var _renderDOM = (0, _dom.renderDOM)(vdom1, container);
+	
+	  var update = _renderDOM.update;
+	
+	
+	  document.getElementById('t').onclick = function () {
+	    var operations = update((0, _dom.dom)(
+	      'div',
+	      null,
+	      (0, _dom.dom)(
+	        'h2',
+	        null,
+	        'no key'
+	      ),
+	      (0, _dom.dom)(
+	        'p',
+	        { id: '2' },
+	        '2'
+	      ),
+	      (0, _dom.dom)(
+	        'p',
+	        { id: '1' },
+	        '1'
+	      ),
+	      (0, _dom.dom)(
+	        'p',
+	        { id: '3' },
+	        '3'
+	      ),
+	      (0, _dom.dom)(
+	        'button',
+	        { id: 't' },
+	        'change'
+	      )
+	    ));
+	    console.log('operations', simplifyOperations(operations));
+	  };
+	})();
+	
+	(function () {
+	  var vdom1 = (0, _dom.dom)(
+	    'div',
+	    null,
+	    (0, _dom.dom)(
+	      'h2',
+	      null,
+	      'with key'
+	    ),
+	    (0, _dom.dom)(
+	      'p',
+	      { key: '1' },
+	      '1'
+	    ),
+	    (0, _dom.dom)(
+	      'p',
+	      { key: '2' },
+	      '2'
+	    ),
+	    (0, _dom.dom)(
+	      'button',
+	      { key: 't', id: 't2' },
+	      'change'
+	    )
+	  );
+	  var container = document.createElement('div');
+	  document.getElementById('__react-content').appendChild(container);
+	
+	  var _renderDOM2 = (0, _dom.renderDOM)(vdom1, container);
+	
+	  var update = _renderDOM2.update;
+	
+	
+	  document.getElementById('t2').onclick = function () {
+	    var operations = update((0, _dom.dom)(
+	      'div',
+	      null,
+	      (0, _dom.dom)(
+	        'h2',
+	        null,
+	        'with key'
+	      ),
+	      (0, _dom.dom)(
+	        'p',
+	        { key: '2' },
+	        '2'
+	      ),
+	      (0, _dom.dom)(
+	        'p',
+	        { key: '1' },
+	        '1'
+	      ),
+	      (0, _dom.dom)(
+	        'p',
+	        { key: '3' },
+	        '3'
+	      ),
+	      (0, _dom.dom)(
+	        'button',
+	        { key: 't', id: 't' },
+	        'change'
+	      )
+	    ));
+	
+	    console.log('operations', simplifyOperations(operations));
+	  };
+	})();
+
+/***/ },
+
+/***/ 180:
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _dom = __webpack_require__(181);
+	
+	Object.defineProperty(exports, 'dom', {
+	  enumerable: true,
+	  get: function get() {
+	    return _interopRequireDefault(_dom).default;
+	  }
+	});
+	
+	var _renderDOM = __webpack_require__(182);
+	
+	Object.defineProperty(exports, 'renderDOM', {
+	  enumerable: true,
+	  get: function get() {
+	    return _interopRequireDefault(_renderDOM).default;
+	  }
+	});
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/***/ },
+
+/***/ 181:
+/***/ function(module, exports) {
+
+	"use strict";
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.default = dom;
 	function dom(type, props) {
 	  for (var _len = arguments.length, children = Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {
 	    children[_key - 2] = arguments[_key];
@@ -213,145 +410,11 @@ webpackJsonp([2,4],{
 	  }
 	  return ret;
 	}
-	
-	(function () {
-	  var vdom1 = dom(
-	    'div',
-	    null,
-	    dom(
-	      'h2',
-	      null,
-	      'no key'
-	    ),
-	    dom(
-	      'p',
-	      { id: '1' },
-	      '1'
-	    ),
-	    dom(
-	      'p',
-	      { id: '2' },
-	      '2'
-	    ),
-	    dom(
-	      'button',
-	      { id: 't' },
-	      'change'
-	    )
-	  );
-	  var container = document.createElement('div');
-	  document.getElementById('__react-content').appendChild(container);
-	
-	  var _renderDOM = (0, _renderDOM4.default)(vdom1, container);
-	
-	  var update = _renderDOM.update;
-	
-	
-	  document.getElementById('t').onclick = function () {
-	    var operations = update(dom(
-	      'div',
-	      null,
-	      dom(
-	        'h2',
-	        null,
-	        'no key'
-	      ),
-	      dom(
-	        'p',
-	        { id: '2' },
-	        '2'
-	      ),
-	      dom(
-	        'p',
-	        { id: '1' },
-	        '1'
-	      ),
-	      dom(
-	        'p',
-	        { id: '3' },
-	        '3'
-	      ),
-	      dom(
-	        'button',
-	        { id: 't' },
-	        'change'
-	      )
-	    ));
-	    console.log('operations', simplifyOperations(operations));
-	  };
-	})();
-	
-	(function () {
-	  var vdom1 = dom(
-	    'div',
-	    null,
-	    dom(
-	      'h2',
-	      null,
-	      'with key'
-	    ),
-	    dom(
-	      'p',
-	      { key: '1' },
-	      '1'
-	    ),
-	    dom(
-	      'p',
-	      { key: '2' },
-	      '2'
-	    ),
-	    dom(
-	      'button',
-	      { key: 't', id: 't2' },
-	      'change'
-	    )
-	  );
-	  var container = document.createElement('div');
-	  document.getElementById('__react-content').appendChild(container);
-	
-	  var _renderDOM2 = (0, _renderDOM4.default)(vdom1, container);
-	
-	  var update = _renderDOM2.update;
-	
-	
-	  document.getElementById('t2').onclick = function () {
-	    var operations = update(dom(
-	      'div',
-	      null,
-	      dom(
-	        'h2',
-	        null,
-	        'with key'
-	      ),
-	      dom(
-	        'p',
-	        { key: '2' },
-	        '2'
-	      ),
-	      dom(
-	        'p',
-	        { key: '1' },
-	        '1'
-	      ),
-	      dom(
-	        'p',
-	        { key: '3' },
-	        '3'
-	      ),
-	      dom(
-	        'button',
-	        { key: 't', id: 't' },
-	        'change'
-	      )
-	    ));
-	
-	    console.log('operations', simplifyOperations(operations));
-	  };
-	})();
+	module.exports = exports['default'];
 
 /***/ },
 
-/***/ 179:
+/***/ 182:
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -366,11 +429,11 @@ webpackJsonp([2,4],{
 	
 	var _diff2 = _interopRequireDefault(_diff);
 	
-	var _createDOMNode = __webpack_require__(180);
+	var _createDOMNode = __webpack_require__(183);
 	
 	var _createDOMNode2 = _interopRequireDefault(_createDOMNode);
 	
-	var _patchDOM = __webpack_require__(181);
+	var _patchDOM = __webpack_require__(184);
 	
 	var _patchDOM2 = _interopRequireDefault(_patchDOM);
 	
@@ -424,7 +487,7 @@ webpackJsonp([2,4],{
 
 /***/ },
 
-/***/ 180:
+/***/ 183:
 /***/ function(module, exports) {
 
 	'use strict';
@@ -461,7 +524,7 @@ webpackJsonp([2,4],{
 
 /***/ },
 
-/***/ 181:
+/***/ 184:
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -470,19 +533,19 @@ webpackJsonp([2,4],{
 	  value: true
 	});
 	
-	var _patch = __webpack_require__(177);
+	var _patch = __webpack_require__(178);
 	
 	var _patch2 = _interopRequireDefault(_patch);
 	
-	var _createDOMNode = __webpack_require__(180);
+	var _createDOMNode = __webpack_require__(183);
 	
 	var _createDOMNode2 = _interopRequireDefault(_createDOMNode);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	function findNodeByPath(root, path) {
+	function findNodeByPath(root, fromPath) {
 	  var parent = root;
-	  var node = path.reduce(function (n, p) {
+	  var node = fromPath.reduce(function (n, p) {
 	    parent = n;
 	    return n.childNodes[p];
 	  }, root) || null;
@@ -493,10 +556,10 @@ webpackJsonp([2,4],{
 	}
 	
 	function processNew(root, q) {
-	  var nextNode = q.nextNode;
+	  var afterNode = q.afterNode;
 	  var toPath = q.toPath;
 	
-	  var newNode = (0, _createDOMNode2.default)(nextNode);
+	  var newNode = (0, _createDOMNode2.default)(afterNode);
 	
 	  var _findNodeByPath = findNodeByPath(root, toPath);
 	
@@ -515,9 +578,9 @@ webpackJsonp([2,4],{
 	}
 	
 	function processRemove(root, q) {
-	  var path = q.path;
+	  var fromPath = q.fromPath;
 	
-	  var _findNodeByPath2 = findNodeByPath(root, path);
+	  var _findNodeByPath2 = findNodeByPath(root, fromPath);
 	
 	  var parent = _findNodeByPath2.parent;
 	  var node = _findNodeByPath2.node;
@@ -527,22 +590,22 @@ webpackJsonp([2,4],{
 	}
 	
 	function processUpdate(root, q) {
-	  var path = q.path;
-	  var currentNode = q.currentNode;
-	  var nextNode = q.nextNode;
+	  var fromPath = q.fromPath;
+	  var fromNode = q.fromNode;
+	  var afterNode = q.afterNode;
 	
-	  var _findNodeByPath3 = findNodeByPath(root, path);
+	  var _findNodeByPath3 = findNodeByPath(root, fromPath);
 	
 	  var node = _findNodeByPath3.node;
 	
-	  if (typeof nextNode === 'string') {
-	    if (nextNode !== currentNode) {
-	      node.nodeValue = nextNode;
+	  if (typeof afterNode === 'string') {
+	    if (afterNode !== fromNode) {
+	      node.nodeValue = afterNode;
 	    }
 	    return;
 	  }
-	  var currentProps = currentNode.props;
-	  var nextProps = nextNode.props;
+	  var currentProps = fromNode.props;
+	  var nextProps = afterNode.props;
 	  for (var nextName in nextProps) {
 	    if (nextProps.hasOwnProperty(nextName)) {
 	      var nextValue = nextProps[nextName];

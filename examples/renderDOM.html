@@ -2,7 +2,7 @@
 <html>
 
 <head>
-  <title>renderDOM.js - example - tree-diff@0.1.0</title>
+  <title>renderDOM.js - example - tree-diff@0.2.0</title>
   <meta name="viewport"
         content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
   <meta charset="utf-8"/>
@@ -258,7 +258,7 @@ Monokai Sublime style. Derived from Monokai by noformnocontent http://nn.mit-lic
 <body>
   <div class="container">
     <div class="header">
-      <h1>tree-diff@0.1.0</h1>
+      <h1>tree-diff@0.2.0</h1>
 
       <p>diff tree node like React</p>
     </div>
@@ -268,25 +268,12 @@ Monokai Sublime style. Derived from Monokai by noformnocontent http://nn.mit-lic
 
 <span class="hljs-comment">/* eslint no-console:0 */</span>
 
-<span class="hljs-keyword">import</span> renderDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'tree-diff/lib/dom/renderDOM'</span>;
+<span class="hljs-keyword">import</span> { dom, renderDOM } <span class="hljs-keyword">from</span> <span class="hljs-string">'tree-diff/lib/dom/'</span>;
 
 <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">simplifyOperations</span>(<span class="hljs-params">operations</span>) </span>{
   <span class="hljs-keyword">return</span> <span class="hljs-built_in">JSON</span>.parse(<span class="hljs-built_in">JSON</span>.stringify(operations, (k, v) =&gt; {
     <span class="hljs-keyword">return</span> k === <span class="hljs-string">'children'</span> || k === <span class="hljs-string">'props'</span> ? <span class="hljs-literal">undefined</span> : v;
   }));
-}
-
-<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">dom</span>(<span class="hljs-params">type, props, ...children</span>) </span>{
-  <span class="hljs-keyword">const</span> ret = {
-    type,
-    props,
-    children,
-  };
-  <span class="hljs-keyword">if</span> (props &amp;&amp; props.key) {
-    ret.key = props.key;
-    <span class="hljs-keyword">delete</span> props.key;
-  }
-  <span class="hljs-keyword">return</span> ret;
 }
 
 (() =&gt; {

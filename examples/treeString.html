@@ -2,7 +2,7 @@
 <html>
 
 <head>
-  <title>treeString.js - example - tree-diff@0.1.0</title>
+  <title>treeString.js - example - tree-diff@0.2.0</title>
   <meta name="viewport"
         content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
   <meta charset="utf-8"/>
@@ -258,7 +258,7 @@ Monokai Sublime style. Derived from Monokai by noformnocontent http://nn.mit-lic
 <body>
   <div class="container">
     <div class="header">
-      <h1>tree-diff@0.1.0</h1>
+      <h1>tree-diff@0.2.0</h1>
 
       <p>diff tree node like React</p>
     </div>
@@ -298,18 +298,18 @@ Monokai Sublime style. Derived from Monokai by noformnocontent http://nn.mit-lic
 
 patch(operations, {
   processNew(q) {
-    getArray(q).splice(q.toPath[q.toPath.length - <span class="hljs-number">1</span>], <span class="hljs-number">0</span>, q.nextNode);
+    getArray(q).splice(q.toIndex, <span class="hljs-number">0</span>, q.afterNode);
   },
   processRemove(q) {
     <span class="hljs-keyword">const</span> arr = getArray(q);
-    <span class="hljs-keyword">const</span> r = arr[q.path[q.path.length - <span class="hljs-number">1</span>]];
-    arr.splice(q.path[q.path.length - <span class="hljs-number">1</span>], <span class="hljs-number">1</span>);
+    <span class="hljs-keyword">const</span> r = arr[q.fromIndex];
+    arr.splice(q.fromIndex, <span class="hljs-number">1</span>);
     <span class="hljs-keyword">return</span> r;
   },
   processUpdate() {
   },
   processMove(q, r) {
-    getArray(q).splice(q.toPath[q.toPath.length - <span class="hljs-number">1</span>], <span class="hljs-number">0</span>, r);
+    getArray(q).splice(q.toIndex, <span class="hljs-number">0</span>, r);
   },
 });
 

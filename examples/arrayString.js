@@ -19,22 +19,22 @@ webpackJsonp([1,4],{
 	
 	var b = ['4', '3', '1', '2'];
 	
-	var operations = (0, _treeDiff.diff)(a, b, { childrenKey: '' });
+	var operations = (0, _treeDiff.diff)(a, b);
 	
 	console.log('operations', operations);
 	
 	(0, _treeDiff.patch)(operations, {
 	  processNew: function processNew(q) {
-	    a.splice(q.toPath[0], 0, q.nextNode);
+	    a.splice(q.toIndex, 0, q.afterNode);
 	  },
 	  processRemove: function processRemove(q) {
-	    var r = a[q.path[0]];
-	    a.splice(q.path[0], 1);
+	    var r = a[q.fromIndex];
+	    a.splice(q.fromIndex, 1);
 	    return r;
 	  },
 	  processUpdate: function processUpdate() {},
 	  processMove: function processMove(q, r) {
-	    a.splice(q.toPath[0], 0, r);
+	    a.splice(q.toIndex, 0, r);
 	  }
 	});
 	
@@ -69,7 +69,7 @@ webpackJsonp([1,4],{
 	  }
 	});
 	
-	var _patch = __webpack_require__(177);
+	var _patch = __webpack_require__(178);
 	
 	Object.defineProperty(exports, 'patch', {
 	  enumerable: true,
@@ -83,7 +83,7 @@ webpackJsonp([1,4],{
 /***/ },
 
 /***/ 176:
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
@@ -91,6 +91,9 @@ webpackJsonp([1,4],{
 	  value: true
 	});
 	exports.default = diffTree;
+	
+	var _ChildOperationTypes = __webpack_require__(177);
+	
 	function indexOf(nodes, node, isSame, nodeIndex) {
 	  var len = nodes.length;
 	  for (var i = 0; i < len; i++) {
@@ -106,22 +109,22 @@ webpackJsonp([1,4],{
 	}
 	
 	function sortByIndex(a, b) {
-	  if (a.currentIndex === b.currentIndex) {
+	  if (a.fromIndex === b.fromIndex) {
 	    return 0;
 	  }
-	  return a.currentIndex > b.currentIndex ? -1 : 1;
+	  return a.fromIndex > b.fromIndex ? -1 : 1;
 	}
 	
 	// diff by level
-	function diff(currentNodes, nextNodes) {
+	function diff(fromNodes, afterNodes) {
 	  var options = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
 	  var internal = arguments.length <= 3 || arguments[3] === undefined ? {} : arguments[3];
 	  var _options$shouldUpdate = options.shouldUpdate;
 	  var shouldUpdate = _options$shouldUpdate === undefined ? nativeShould : _options$shouldUpdate;
 	  var _options$childrenKey = options.childrenKey;
 	  var childrenKey = _options$childrenKey === undefined ? 'children' : _options$childrenKey;
-	  var _internal$path = internal.path;
-	  var path = _internal$path === undefined ? [] : _internal$path;
+	  var _internal$fromPath = internal.fromPath;
+	  var fromPath = _internal$fromPath === undefined ? [] : _internal$fromPath;
 	  var parentNode = internal.parentNode;
 	
 	  var insertQueue = [];
@@ -129,50 +132,53 @@ webpackJsonp([1,4],{
 	  var removeQueue = [];
 	  var lastIndex = 0;
 	  var tmp = void 0;
-	  nextNodes.forEach(function (nextNode, nextIndex) {
-	    var currentIndex = indexOf(currentNodes, nextNode, shouldUpdate, nextIndex);
-	    if (currentIndex !== -1) {
-	      var currentNode = currentNodes[currentIndex];
+	  afterNodes.forEach(function (afterNode, toIndex) {
+	    var fromIndex = indexOf(fromNodes, afterNode, shouldUpdate, toIndex);
+	    if (fromIndex !== -1) {
+	      var fromNode = fromNodes[fromIndex];
 	      updateQueue.push({
-	        type: 'update',
-	        currentNode: currentNode,
-	        nextNode: nextNode,
+	        type: _ChildOperationTypes.UPDATE,
+	        fromNode: fromNode,
+	        afterNode: afterNode,
 	        parentNode: parentNode,
-	        path: path.concat(currentIndex)
+	        fromIndex: fromIndex,
+	        fromPath: fromPath.concat(fromIndex)
 	      });
-	      if (currentIndex < lastIndex) {
+	      if (fromIndex < lastIndex) {
 	        tmp = {
-	          type: 'move',
-	          currentNode: currentNode,
-	          nextNode: nextNode,
+	          type: _ChildOperationTypes.MOVE,
+	          fromNode: fromNode,
+	          afterNode: afterNode,
 	          parentNode: parentNode,
-	          currentIndex: currentIndex,
-	          path: path.concat(currentIndex),
-	          toPath: path.concat(nextIndex)
+	          fromIndex: fromIndex,
+	          toIndex: toIndex,
+	          fromPath: fromPath.concat(fromIndex),
+	          toPath: fromPath.concat(toIndex)
 	        };
 	        insertQueue.push(tmp);
 	        removeQueue.push(tmp);
 	      }
-	      lastIndex = Math.max(currentIndex, lastIndex);
+	      lastIndex = Math.max(fromIndex, lastIndex);
 	    } else {
 	      insertQueue.push({
-	        type: 'new',
-	        nextNode: nextNode,
+	        type: _ChildOperationTypes.NEW,
+	        afterNode: afterNode,
 	        parentNode: parentNode,
-	        toPath: path.concat(nextIndex)
+	        toIndex: toIndex,
+	        toPath: fromPath.concat(toIndex)
 	      });
 	    }
 	  });
 	
-	  currentNodes.forEach(function (currentNode, currentIndex) {
-	    var nextIndex = indexOf(nextNodes, currentNode, shouldUpdate, currentIndex);
-	    if (nextIndex === -1) {
+	  fromNodes.forEach(function (fromNode, fromIndex) {
+	    var toIndex = indexOf(afterNodes, fromNode, shouldUpdate, fromIndex);
+	    if (toIndex === -1) {
 	      removeQueue.push({
-	        type: 'remove',
-	        currentNode: currentNode,
+	        type: _ChildOperationTypes.REMOVE,
+	        fromNode: fromNode,
 	        parentNode: parentNode,
-	        currentIndex: currentIndex,
-	        path: path.concat(currentIndex)
+	        fromIndex: fromIndex,
+	        fromPath: fromPath.concat(fromIndex)
 	      });
 	    }
 	  });
@@ -181,12 +187,12 @@ webpackJsonp([1,4],{
 	
 	  if (childrenKey) {
 	    updateQueue.concat().forEach(function (o) {
-	      var currentChildren = o.currentNode[childrenKey] || [];
-	      var nextChildren = o.nextNode[childrenKey] || [];
+	      var currentChildren = o.fromNode[childrenKey] || [];
+	      var nextChildren = o.afterNode[childrenKey] || [];
 	      // bottom up
 	      var ret = diff(currentChildren, nextChildren, options, {
-	        path: o.path,
-	        parentNode: o.currentNode
+	        fromPath: o.fromPath,
+	        parentNode: o.fromNode
 	      });
 	      insertQueue = ret.insertQueue.concat(insertQueue);
 	      updateQueue = ret.updateQueue.concat(updateQueue);
@@ -201,8 +207,8 @@ webpackJsonp([1,4],{
 	  };
 	}
 	
-	function diffTree(currentNodes, nextNodes, options) {
-	  return diff(currentNodes, nextNodes, options);
+	function diffTree(fromNodes, afterNodes, options) {
+	  return diff(fromNodes, afterNodes, options);
 	}
 	module.exports = exports['default'];
 
@@ -216,6 +222,24 @@ webpackJsonp([1,4],{
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
+	var MOVE = exports.MOVE = 'move';
+	var UPDATE = exports.UPDATE = 'update';
+	var REMOVE = exports.REMOVE = 'remove';
+	var NEW = exports.NEW = 'new';
+
+/***/ },
+
+/***/ 178:
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _ChildOperationTypes = __webpack_require__(177);
+	
 	function patch(_ref, _ref2) {
 	  var removeQueue = _ref.removeQueue;
 	  var insertQueue = _ref.insertQueue;
@@ -233,15 +257,15 @@ webpackJsonp([1,4],{
 	
 	  removeQueue.forEach(function (q) {
 	    var ret = processRemove(q);
-	    if (q.type === 'move') {
+	    if (q.type === _ChildOperationTypes.MOVE) {
 	      moves[q.toPath.join(',')] = ret;
 	    }
 	  });
 	
 	  insertQueue.forEach(function (q) {
-	    if (q.type === 'new') {
+	    if (q.type === _ChildOperationTypes.NEW) {
 	      processNew(q);
-	    } else if (q.type === 'move') {
+	    } else if (q.type === _ChildOperationTypes.MOVE) {
 	      processMove(q, moves[q.toPath.join(',')]);
 	    }
 	  });

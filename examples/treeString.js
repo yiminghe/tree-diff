@@ -3,7 +3,7 @@ webpackJsonp([3,4],{
 /***/ 0:
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = __webpack_require__(182);
+	module.exports = __webpack_require__(185);
 
 
 /***/ },
@@ -35,7 +35,7 @@ webpackJsonp([3,4],{
 	  }
 	});
 	
-	var _patch = __webpack_require__(177);
+	var _patch = __webpack_require__(178);
 	
 	Object.defineProperty(exports, 'patch', {
 	  enumerable: true,
@@ -49,7 +49,7 @@ webpackJsonp([3,4],{
 /***/ },
 
 /***/ 176:
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 	
@@ -57,6 +57,9 @@ webpackJsonp([3,4],{
 	  value: true
 	});
 	exports.default = diffTree;
+	
+	var _ChildOperationTypes = __webpack_require__(177);
+	
 	function indexOf(nodes, node, isSame, nodeIndex) {
 	  var len = nodes.length;
 	  for (var i = 0; i < len; i++) {
@@ -72,22 +75,22 @@ webpackJsonp([3,4],{
 	}
 	
 	function sortByIndex(a, b) {
-	  if (a.currentIndex === b.currentIndex) {
+	  if (a.fromIndex === b.fromIndex) {
 	    return 0;
 	  }
-	  return a.currentIndex > b.currentIndex ? -1 : 1;
+	  return a.fromIndex > b.fromIndex ? -1 : 1;
 	}
 	
 	// diff by level
-	function diff(currentNodes, nextNodes) {
+	function diff(fromNodes, afterNodes) {
 	  var options = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
 	  var internal = arguments.length <= 3 || arguments[3] === undefined ? {} : arguments[3];
 	  var _options$shouldUpdate = options.shouldUpdate;
 	  var shouldUpdate = _options$shouldUpdate === undefined ? nativeShould : _options$shouldUpdate;
 	  var _options$childrenKey = options.childrenKey;
 	  var childrenKey = _options$childrenKey === undefined ? 'children' : _options$childrenKey;
-	  var _internal$path = internal.path;
-	  var path = _internal$path === undefined ? [] : _internal$path;
+	  var _internal$fromPath = internal.fromPath;
+	  var fromPath = _internal$fromPath === undefined ? [] : _internal$fromPath;
 	  var parentNode = internal.parentNode;
 	
 	  var insertQueue = [];
@@ -95,50 +98,53 @@ webpackJsonp([3,4],{
 	  var removeQueue = [];
 	  var lastIndex = 0;
 	  var tmp = void 0;
-	  nextNodes.forEach(function (nextNode, nextIndex) {
-	    var currentIndex = indexOf(currentNodes, nextNode, shouldUpdate, nextIndex);
-	    if (currentIndex !== -1) {
-	      var currentNode = currentNodes[currentIndex];
+	  afterNodes.forEach(function (afterNode, toIndex) {
+	    var fromIndex = indexOf(fromNodes, afterNode, shouldUpdate, toIndex);
+	    if (fromIndex !== -1) {
+	      var fromNode = fromNodes[fromIndex];
 	      updateQueue.push({
-	        type: 'update',
-	        currentNode: currentNode,
-	        nextNode: nextNode,
+	        type: _ChildOperationTypes.UPDATE,
+	        fromNode: fromNode,
+	        afterNode: afterNode,
 	        parentNode: parentNode,
-	        path: path.concat(currentIndex)
+	        fromIndex: fromIndex,
+	        fromPath: fromPath.concat(fromIndex)
 	      });
-	      if (currentIndex < lastIndex) {
+	      if (fromIndex < lastIndex) {
 	        tmp = {
-	          type: 'move',
-	          currentNode: currentNode,
-	          nextNode: nextNode,
+	          type: _ChildOperationTypes.MOVE,
+	          fromNode: fromNode,
+	          afterNode: afterNode,
 	          parentNode: parentNode,
-	          currentIndex: currentIndex,
-	          path: path.concat(currentIndex),
-	          toPath: path.concat(nextIndex)
+	          fromIndex: fromIndex,
+	          toIndex: toIndex,
+	          fromPath: fromPath.concat(fromIndex),
+	          toPath: fromPath.concat(toIndex)
 	        };
 	        insertQueue.push(tmp);
 	        removeQueue.push(tmp);
 	      }
-	      lastIndex = Math.max(currentIndex, lastIndex);
+	      lastIndex = Math.max(fromIndex, lastIndex);
 	    } else {
 	      insertQueue.push({
-	        type: 'new',
-	        nextNode: nextNode,
+	        type: _ChildOperationTypes.NEW,
+	        afterNode: afterNode,
 	        parentNode: parentNode,
-	        toPath: path.concat(nextIndex)
+	        toIndex: toIndex,
+	        toPath: fromPath.concat(toIndex)
 	      });
 	    }
 	  });
 	
-	  currentNodes.forEach(function (currentNode, currentIndex) {
-	    var nextIndex = indexOf(nextNodes, currentNode, shouldUpdate, currentIndex);
-	    if (nextIndex === -1) {
+	  fromNodes.forEach(function (fromNode, fromIndex) {
+	    var toIndex = indexOf(afterNodes, fromNode, shouldUpdate, fromIndex);
+	    if (toIndex === -1) {
 	      removeQueue.push({
-	        type: 'remove',
-	        currentNode: currentNode,
+	        type: _ChildOperationTypes.REMOVE,
+	        fromNode: fromNode,
 	        parentNode: parentNode,
-	        currentIndex: currentIndex,
-	        path: path.concat(currentIndex)
+	        fromIndex: fromIndex,
+	        fromPath: fromPath.concat(fromIndex)
 	      });
 	    }
 	  });
@@ -147,12 +153,12 @@ webpackJsonp([3,4],{
 	
 	  if (childrenKey) {
 	    updateQueue.concat().forEach(function (o) {
-	      var currentChildren = o.currentNode[childrenKey] || [];
-	      var nextChildren = o.nextNode[childrenKey] || [];
+	      var currentChildren = o.fromNode[childrenKey] || [];
+	      var nextChildren = o.afterNode[childrenKey] || [];
 	      // bottom up
 	      var ret = diff(currentChildren, nextChildren, options, {
-	        path: o.path,
-	        parentNode: o.currentNode
+	        fromPath: o.fromPath,
+	        parentNode: o.fromNode
 	      });
 	      insertQueue = ret.insertQueue.concat(insertQueue);
 	      updateQueue = ret.updateQueue.concat(updateQueue);
@@ -167,8 +173,8 @@ webpackJsonp([3,4],{
 	  };
 	}
 	
-	function diffTree(currentNodes, nextNodes, options) {
-	  return diff(currentNodes, nextNodes, options);
+	function diffTree(fromNodes, afterNodes, options) {
+	  return diff(fromNodes, afterNodes, options);
 	}
 	module.exports = exports['default'];
 
@@ -182,6 +188,24 @@ webpackJsonp([3,4],{
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
+	var MOVE = exports.MOVE = 'move';
+	var UPDATE = exports.UPDATE = 'update';
+	var REMOVE = exports.REMOVE = 'remove';
+	var NEW = exports.NEW = 'new';
+
+/***/ },
+
+/***/ 178:
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _ChildOperationTypes = __webpack_require__(177);
+	
 	function patch(_ref, _ref2) {
 	  var removeQueue = _ref.removeQueue;
 	  var insertQueue = _ref.insertQueue;
@@ -199,15 +223,15 @@ webpackJsonp([3,4],{
 	
 	  removeQueue.forEach(function (q) {
 	    var ret = processRemove(q);
-	    if (q.type === 'move') {
+	    if (q.type === _ChildOperationTypes.MOVE) {
 	      moves[q.toPath.join(',')] = ret;
 	    }
 	  });
 	
 	  insertQueue.forEach(function (q) {
-	    if (q.type === 'new') {
+	    if (q.type === _ChildOperationTypes.NEW) {
 	      processNew(q);
-	    } else if (q.type === 'move') {
+	    } else if (q.type === _ChildOperationTypes.MOVE) {
 	      processMove(q, moves[q.toPath.join(',')]);
 	    }
 	  });
@@ -218,7 +242,7 @@ webpackJsonp([3,4],{
 
 /***/ },
 
-/***/ 182:
+/***/ 185:
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -257,17 +281,17 @@ webpackJsonp([3,4],{
 	
 	(0, _treeDiff.patch)(operations, {
 	  processNew: function processNew(q) {
-	    getArray(q).splice(q.toPath[q.toPath.length - 1], 0, q.nextNode);
+	    getArray(q).splice(q.toIndex, 0, q.afterNode);
 	  },
 	  processRemove: function processRemove(q) {
 	    var arr = getArray(q);
-	    var r = arr[q.path[q.path.length - 1]];
-	    arr.splice(q.path[q.path.length - 1], 1);
+	    var r = arr[q.fromIndex];
+	    arr.splice(q.fromIndex, 1);
 	    return r;
 	  },
 	  processUpdate: function processUpdate() {},
 	  processMove: function processMove(q, r) {
-	    getArray(q).splice(q.toPath[q.toPath.length - 1], 0, r);
+	    getArray(q).splice(q.toIndex, 0, r);
 	  }
 	});
 	

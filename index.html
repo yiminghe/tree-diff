@@ -7,7 +7,7 @@
   <meta charset="utf-8"/>
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <link href="//cdnjs.cloudflare.com/ajax/libs/normalize/3.0.3/normalize.css" rel="stylesheet"/>
-  <title>tree-diff@0.1.0 - diff tree node like React</title>
+  <title>tree-diff@0.2.0 - diff tree node like React</title>
   <style>
     @font-face {
       font-family: octicons-anchor;
@@ -737,7 +737,7 @@
 
 <body>
 <div class="header">
-  <h1>tree-diff@0.1.0</h1>
+  <h1>tree-diff@0.2.0</h1>
 </div>
 <div class="examples">
   <h3>EXAMPLES</h3>
@@ -765,7 +765,7 @@
 <a href="https://gemnasium.com/yiminghe/tree-diff" title="null"><img src="http://img.shields.io/gemnasium/yiminghe/tree-diff.svg?style=flat-square" alt="gemnasium deps"></a>
 <a href="https://npmjs.org/package/tree-diff" title="null"><img src="https://img.shields.io/npm/dm/tree-diff.svg?style=flat-square" alt="npm download"></a></p>
 <h2>Demo<a id="user-content-demo" name="demo" class="anchor" aria-hidden="true" href="#demo"><span class="octicon octicon-link"></span></a></h2><p><a href="http://yiminghe.github.io/tree-diff" title="null">http://yiminghe.github.io/tree-diff</a></p>
-<h2>Api<a id="user-content-api" name="api" class="anchor" aria-hidden="true" href="#api"><span class="octicon octicon-link"></span></a></h2><h3>diff(currentNodes: any[], nextNodes : any[], options = {}): Patch<a id="user-content-diff(currentnodes:-any[],-nextnodes-:-any[],-options-=-{}):-patch" name="diff(currentnodes:-any[],-nextnodes-:-any[],-options-=-{}):-patch" class="anchor" aria-hidden="true" href="#diff(currentnodes:-any[],-nextnodes-:-any[],-options-=-{}):-patch"><span class="octicon octicon-link"></span></a></h3><h4>options.shouldUpdate(node1, node2, node1Index, node2Index)<a id="user-content-options.shouldupdate(node1,-node2,-node1index,-node2index)" name="options.shouldupdate(node1,-node2,-node1index,-node2index)" class="anchor" aria-hidden="true" href="#options.shouldupdate(node1,-node2,-node1index,-node2index)"><span class="octicon octicon-link"></span></a></h4><p>decide whether change node1 to node2 or detroy node1 and recreate node2</p>
+<h2>Api<a id="user-content-api" name="api" class="anchor" aria-hidden="true" href="#api"><span class="octicon octicon-link"></span></a></h2><h3>diff(fromNodes: any[], afterNodes : any[], options = {}): Patch<a id="user-content-diff(fromnodes:-any[],-afternodes-:-any[],-options-=-{}):-patch" name="diff(fromnodes:-any[],-afternodes-:-any[],-options-=-{}):-patch" class="anchor" aria-hidden="true" href="#diff(fromnodes:-any[],-afternodes-:-any[],-options-=-{}):-patch"><span class="octicon octicon-link"></span></a></h3><h4>options.shouldUpdate(node1, node2, node1Index, node2Index)<a id="user-content-options.shouldupdate(node1,-node2,-node1index,-node2index)" name="options.shouldupdate(node1,-node2,-node1index,-node2index)" class="anchor" aria-hidden="true" href="#options.shouldupdate(node1,-node2,-node1index,-node2index)"><span class="octicon octicon-link"></span></a></h4><p>decide whether change node1 to node2 or detroy node1 and recreate node2</p>
 <h4>options.childrenKey=&quot;children&quot;<a id="user-content-options.childrenkey=&quot;children&quot;" name="options.childrenkey=&quot;children&quot;" class="anchor" aria-hidden="true" href="#options.childrenkey=&quot;children&quot;"><span class="octicon octicon-link"></span></a></h4><p>children member name if node type is object</p>
 <h3>patch(patcher: Patcher, operations)<a id="user-content-patch(patcher:-patcher,-operations)" name="patch(patcher:-patcher,-operations)" class="anchor" aria-hidden="true" href="#patch(patcher:-patcher,-operations)"><span class="octicon octicon-link"></span></a></h3><p>for example: src/dom/patchDOM.js</p>
 <h4>operations.processNew<a id="user-content-operations.processnew" name="operations.processnew" class="anchor" aria-hidden="true" href="#operations.processnew"><span class="octicon octicon-link"></span></a></h4><p>how to process new node</p>
